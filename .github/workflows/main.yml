@@ -1,0 +1,45 @@
+name: CI Workflow
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run syntax check
+        run: |
+          echo "Validating code..."
+          python -m py_compile main.py
+
+  build:
+    name: Simulate Build
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      SECRET_MESSAGE: ${{ secrets.SECRET_MESSAGE }}
+      PUBLIC_VAR: "Simulation Mode"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Simulate Build Process
+        run: |
+          echo "Starting build in $PUBLIC_VAR..."
+          echo "Build successful!"
+
+      - name: Display Secret Message
+        run: |
+          if [ -z "$SECRET_MESSAGE" ]; then
+            echo "Secret message is not set. (Note: You need to add SECRET_MESSAGE in GitHub Repo Settings -> Secrets -> Actions)"
+          else
+            echo "The secret message is: $SECRET_MESSAGE"
+          fi
